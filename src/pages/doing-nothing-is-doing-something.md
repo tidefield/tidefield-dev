@@ -2,7 +2,7 @@
 layout: ../layouts/PostLayout.astro
 title: "Doing nothing is doing something"
 date: "2026-06-22"
-description: "The first month of my career break before joining Recurse Center"
+description: "First month of pausing, sitting with uncertainty, and unlearning momentum"
 ---
 > This post is longer than I anticipated. I started writing with the intention of capturing my current stage. I ended up dwelling on my root. I thought of removing it but a tree can't nourish without a root.
 
@@ -36,7 +36,7 @@ As I become more aware of the world outside and within myself, for the first tim
 
 **Having so many questions**
 
-My profession has changed rapidly this past year. On one hand, AI has lowered the barrier to entry and helped me quickly venture into exciting work areas like [rust-c++ interop](https://github.com/google/safe-bindings) that I did for Google recently. Before, it would have taken me much longer to onboard and provide value to the project.
+My profession has changed rapidly this past year. On one hand, AI has lowered the barrier to entry and helped me quickly venture into exciting work areas like [C++/Rust interop](https://github.com/google/safe-bindings) that I did for Google recently. Before, it would have taken me much longer to onboard and provide value to the project.
 
 On the other hand, I am uncomfortable when engineering quality is being deprioritized. If it's easier to add software now, should we spend more effort thinking about and doubling down on engineering discipline?
 
