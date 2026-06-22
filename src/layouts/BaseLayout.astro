@@ -1,5 +1,6 @@
 ---
 import Nav from "../components/Nav.astro";
+import "../styles/typewriter.css";
 
 const {
     title = "Tide Field",
@@ -47,6 +48,8 @@ const canonicalURL = new URL(currentPath, Astro.site);
         />
         <style is:global>
             :root {
+                --font-body: "iA Writer Quattro S", ui-serif, Georgia, serif;
+                --font-mono: "JetBrains Mono", "iA Writer Mono V", ui-monospace, SFMono-Regular, Menlo, monospace;
                 --max-width: 680px;
                 --spacing-x: 2rem;
                 --spacing-y: 3rem;
@@ -57,10 +60,7 @@ const canonicalURL = new URL(currentPath, Astro.site);
                 padding: 0;
             }
             body {
-                font-family:
-                    system-ui,
-                    -apple-system,
-                    sans-serif;
+                font-family: var(--font-body);
                 line-height: 1.8;
                 color: #333;
                 max-width: var(--max-width);
