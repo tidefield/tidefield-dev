@@ -18,6 +18,18 @@ const { title, date, description, image } = frontmatter;
         <div style="line-height: 1.8;">
             <slot />
         </div>
+        <script>
+            document.querySelectorAll("article h2[id], article h3[id]").forEach((heading) => {
+                if (heading.querySelector("a[data-heading-link]")) return;
+                const anchor = document.createElement("a");
+                anchor.href = `#${heading.id}`;
+                anchor.dataset.headingLink = "";
+                anchor.textContent = heading.textContent ?? "";
+                anchor.setAttribute("aria-label", `Link to ${anchor.textContent}`);
+                heading.textContent = "";
+                heading.append(anchor);
+            });
+        </script>
     </article>
 
     <style is:global>
@@ -28,6 +40,17 @@ const { title, date, description, image } = frontmatter;
         article h3 {
             margin-top: 1.5rem;
             margin-bottom: 0.75rem;
+        }
+        article h2 a[data-heading-link],
+        article h3 a[data-heading-link] {
+            color: var(--heading-ink);
+            text-decoration: none;
+        }
+        article h2 a[data-heading-link]:hover,
+        article h3 a[data-heading-link]:hover {
+            text-decoration: underline;
+            text-decoration-thickness: 1px;
+            text-underline-offset: 0.2em;
         }
         article p {
             margin-bottom: 1rem;

@@ -50,6 +50,12 @@ const canonicalURL = new URL(currentPath, Astro.site);
             :root {
                 --font-body: "iA Writer Quattro S", ui-serif, Georgia, serif;
                 --font-mono: "JetBrains Mono", "iA Writer Mono V", ui-monospace, SFMono-Regular, Menlo, monospace;
+                --page-bg: hsl(42, 34%, 84%);
+                --paper-bg: #fcf5e4;
+                --ink: hsl(0, 0%, 15%);
+                --heading-ink: #111;
+                --muted-ink: hsl(0, 0%, 35%);
+                --rule: hsl(42, 18%, 62%);
                 --max-width: 680px;
                 --spacing-x: 2rem;
                 --spacing-y: 3rem;
@@ -59,11 +65,16 @@ const canonicalURL = new URL(currentPath, Astro.site);
                 margin: 0;
                 padding: 0;
             }
+            html {
+                background: var(--page-bg);
+            }
             body {
                 font-family: var(--font-body);
                 line-height: 1.8;
-                color: #333;
+                color: var(--ink);
+                background: var(--paper-bg);
                 max-width: var(--max-width);
+                min-height: 100vh;
                 margin: 0 auto;
                 padding: var(--spacing-y) var(--spacing-x);
             }
@@ -73,7 +84,7 @@ const canonicalURL = new URL(currentPath, Astro.site);
                 }
             }
             a {
-                color: #0066cc;
+                color: #365f8c;
                 text-decoration: none;
             }
             a:hover {
@@ -97,6 +108,7 @@ const canonicalURL = new URL(currentPath, Astro.site);
             h6 {
                 margin-top: 2rem;
                 margin-bottom: 1rem;
+                color: var(--heading-ink);
             }
             h1:first-child,
             h2:first-child,
