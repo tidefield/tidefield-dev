@@ -16,13 +16,17 @@ const sortedPosts = posts
         {
             sortedPosts.map((post) => (
                 <li class="post-item">
-                    <h3 class="post-title">
-                        <a href={post.url}>{post.frontmatter.title}</a>
-                    </h3>
+                    <div class="post-heading">
+                        <time class="post-date" datetime={post.frontmatter.date}>
+                            {post.frontmatter.date}
+                        </time>
+                        <h3 class="post-title">
+                            <a href={post.url}>{post.frontmatter.title}</a>
+                        </h3>
+                    </div>
                     <p class="post-description">
                         {post.frontmatter.description}
                     </p>
-                    <div class="post-meta">{post.frontmatter.date}</div>
                 </li>
             ))
         }
@@ -35,16 +39,23 @@ const sortedPosts = posts
         padding: 0;
     }
     .post-item {
-        margin-bottom: 2rem;
-        padding-bottom: 2rem;
+        padding: 0.85rem 0;
         border-bottom: 1px solid #eee;
     }
     .post-item:last-child {
         border-bottom: none;
     }
+    .post-heading {
+        display: grid;
+        grid-template-columns: 6.5rem 1fr;
+        column-gap: 1rem;
+        align-items: baseline;
+    }
     .post-title {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin: 0;
     }
     .post-title a {
         color: #333;
@@ -53,12 +64,26 @@ const sortedPosts = posts
     .post-title a:hover {
         color: #0066cc;
     }
-    .post-meta {
+    .post-date {
         color: #666;
-        font-size: 0.9rem;
-        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+        white-space: nowrap;
     }
     .post-description {
         color: #555;
+        font-size: 0.95rem;
+        line-height: 1.55;
+        margin: 0.2rem 0 0 7.5rem;
+    }
+    @media (max-width: 720px) {
+        .post-heading {
+            display: block;
+        }
+        .post-title {
+            margin-top: 0.1rem;
+        }
+        .post-description {
+            margin-left: 0;
+        }
     }
 </style>
