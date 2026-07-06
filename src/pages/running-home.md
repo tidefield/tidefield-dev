@@ -17,7 +17,7 @@ Five months ago, I was suffering from chronic neck pain and sleep disorder from 
 
 I started with my sleep schedule. Instead of setting an alarm to wake up, I set one to go to bed at 10pm. This anchored my sleep at the right time every day. Waking up naturally to the sunrise became the best feeling. No more dragging myself out of bed exhausted. Then I started eating healthier and moving more.
 
-In January, after writing my [new year post](https://writing.tidefield.dev/hello-world-again/), I decided to sign up for a half marathon. At the time, 4km was enough to make me stop. But I signed up anyway, partly to see how far I could go, and partly because I needed an excuse to travel to my hometown. I only had 2 months to prepare.
+In January, after writing my [new year post](https://tidefield.dev/hello-world-again/), I decided to sign up for a half marathon. At the time, 4km was enough to make me stop. But I signed up anyway, partly to see how far I could go, and partly because I needed an excuse to travel to my hometown. I only had 2 months to prepare.
 
 Training taught me a lot about my miracle body. For two months, I completed every single training run without fail. Despite many years of trying to practice meditation, running had made me more aware of my body than anything else. The one or two days I slipped on my sleep schedule, I felt it immediately in my performance. I cancelled hangouts just to sleep early for the next morning's run.
 
