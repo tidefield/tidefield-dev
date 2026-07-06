@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/PostLayout.astro
 title: "Recurse Center, week 1"
-date: "2026-07-06"
+date: "2026-07-05"
 description: "Settling in and feeling less productive"
 ---
 
