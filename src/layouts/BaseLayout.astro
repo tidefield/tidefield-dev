@@ -69,6 +69,8 @@ const canonicalURL = new URL(currentPath, Astro.site);
                 background: var(--page-bg);
             }
             body {
+                display: flex;
+                flex-direction: column;
                 font-family: var(--font-body);
                 line-height: 1.8;
                 color: var(--ink);
@@ -91,6 +93,7 @@ const canonicalURL = new URL(currentPath, Astro.site);
                 text-decoration: underline;
             }
             main {
+                flex: 1 0 auto;
                 margin-top: 2rem;
             }
             ul,
