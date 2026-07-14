@@ -1,4 +1,7 @@
-name: Playground artifact
+name: Playground build
+
+permissions:
+  contents: write
 
 on:
   push:
@@ -26,9 +29,34 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Write manifest
+        run: |
+          node --input-type=module <<'EOF'
+          import { readdir, writeFile } from "node:fs/promises";
+          import { join } from "node:path";
+
+          async function walk(dir, prefix = "") {
+            const entries = await readdir(dir, { withFileTypes: true });
+            const files = [];
+            for (const entry of entries) {
+              const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
+              const fullPath = join(dir, entry.name);
+              if (entry.isDirectory()) {
+                files.push(...await walk(fullPath, relative));
+              } else if (entry.isFile()) {
+                files.push(relative);
+              }
+            }
+            return files;
+          }
+
+          const files = (await walk("dist")).sort();
+          await writeFile("dist/manifest.json", `${JSON.stringify({ files }, null, 2)}\n`);
+          EOF
+
+      - name: Publish build branch
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          name: playground-build
-          path: dist/
-          if-no-files-found: error
+          branch: playground-build
+          folder: dist
+          clean: true
