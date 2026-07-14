@@ -10,53 +10,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Write manifest
-        run: |
-          node --input-type=module <<'EOF'
-          import { readdir, writeFile } from "node:fs/promises";
-          import { join } from "node:path";
-
-          async function walk(dir, prefix = "") {
-            const entries = await readdir(dir, { withFileTypes: true });
-            const files = [];
-            for (const entry of entries) {
-              const relative = prefix ? `${prefix}/${entry.name}` : entry.name;
-              const fullPath = join(dir, entry.name);
-              if (entry.isDirectory()) {
-                files.push(...await walk(fullPath, relative));
-              } else if (entry.isFile()) {
-                files.push(relative);
-              }
-            }
-            return files;
-          }
-
-          const files = (await walk("dist")).sort();
-          await writeFile("dist/manifest.json", `${JSON.stringify({ files }, null, 2)}\n`);
-          EOF
-
-      - name: Publish build branch
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: playground-build
-          folder: dist
-          clean: true
+  publish:
+    uses: tidefield/disco-playground/.github/workflows/publish-static-build.yml@main
+    with:
+      install-command: npm ci
+      build-command: npm run build
+      output-dir: dist
+      branch: build
+      node-version: "22"
