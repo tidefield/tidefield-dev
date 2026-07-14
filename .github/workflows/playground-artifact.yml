@@ -18,3 +18,4 @@ jobs:
       output-dir: dist
       branch: build
       node-version: "22"
+      commit-message: Publish tidefield-dev build
