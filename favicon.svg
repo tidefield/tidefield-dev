@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Sky -->
+  <rect width="128" height="64" fill="#87CEEB"/>
+
+  <!-- Field -->
+  <rect y="64" width="128" height="64" fill="#90EE90"/>
+
+  <!-- Rice stalks -->
+  <g fill="#228B22">
+    <!-- Left cluster -->
+    <rect x="15" y="50" width="2" height="30" rx="1"/>
+    <rect x="20" y="48" width="2" height="32" rx="1"/>
+    <rect x="25" y="52" width="2" height="28" rx="1"/>
+
+    <!-- Center cluster -->
+    <rect x="50" y="45" width="2" height="35" rx="1"/>
+    <rect x="55" y="48" width="2" height="32" rx="1"/>
+    <rect x="60" y="46" width="2" height="34" rx="1"/>
+    <rect x="65" y="50" width="2" height="30" rx="1"/>
+
+    <!-- Right cluster -->
+    <rect x="95" y="48" width="2" height="32" rx="1"/>
+    <rect x="100" y="50" width="2" height="30" rx="1"/>
+    <rect x="105" y="52" width="2" height="28" rx="1"/>
+  </g>
+
+  <!-- Rice grains -->
+  <g fill="#FFD700">
+    <!-- Left -->
+    <ellipse cx="16" cy="48" rx="3" ry="4"/>
+    <ellipse cx="21" cy="46" rx="3" ry="4"/>
+    <ellipse cx="26" cy="50" rx="3" ry="4"/>
+
+    <!-- Center -->
+    <ellipse cx="51" cy="43" rx="3" ry="4"/>
+    <ellipse cx="56" cy="46" rx="3" ry="4"/>
+    <ellipse cx="61" cy="44" rx="3" ry="4"/>
+    <ellipse cx="66" cy="48" rx="3" ry="4"/>
+
+    <!-- Right -->
+    <ellipse cx="96" cy="46" rx="3" ry="4"/>
+    <ellipse cx="101" cy="48" rx="3" ry="4"/>
+    <ellipse cx="106" cy="50" rx="3" ry="4"/>
+  </g>
+</svg>
