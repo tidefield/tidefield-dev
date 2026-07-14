@@ -2,7 +2,7 @@
 layout: ../layouts/PostLayout.astro
 title: "Recurse Center, week 2"
 date: "2026-07-13"
-description: "Crafting Interpreters, learning BLE, and settling into exploration"
+description: "Crafting Interpreters, merged Biome PRs, and a Garmin BLE adventure"
 image: "/images/rc-week-2-running.png"
 ---
 

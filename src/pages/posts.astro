@@ -24,9 +24,6 @@ const sortedPosts = posts
                             <a href={post.url}>{post.frontmatter.title}</a>
                         </h3>
                     </div>
-                    <p class="post-description">
-                        {post.frontmatter.description}
-                    </p>
                 </li>
             ))
         }
@@ -69,21 +66,12 @@ const sortedPosts = posts
         font-size: 0.85rem;
         white-space: nowrap;
     }
-    .post-description {
-        color: #555;
-        font-size: 0.95rem;
-        line-height: 1.55;
-        margin: 0.2rem 0 0 7.5rem;
-    }
     @media (max-width: 720px) {
         .post-heading {
             display: block;
         }
         .post-title {
             margin-top: 0.1rem;
-        }
-        .post-description {
-            margin-left: 0;
         }
     }
 </style>
