@@ -157,14 +157,7 @@ The beauty is we're not forced to choose between binary search and the cursor ap
 ## How other VMs approach this
 
 ### JVM
-The JVM's [`LineNumberTable`](https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.12) uses essentially the same starting-offset representation. It is an optional attribute of each method's [`Code`](https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.3), and every `(start_pc, line_number)` entry marks where a source line begins. For example:
-
-```text
-(0, 10)  (4, 11)  (9, 14)
-```
-
-Bytecode offset 6 maps to line 11 because `(4, 11)` has the greatest `start_pc` less than or equal to 6. One difference is that the spec does not require the entries to be sorted. When HotSpot needs to find the line number, [`line_number_from_bci`](https://code.googlesource.com/edge/openjdk/+/4c9e8b056de9eaa7412d42edfe4bf0b29e02250e/hotspot/src/share/vm/oops/method.cpp#628) conducts a linear search to find the predecessor.
-
+The JVM's [`LineNumberTable`](https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.12) uses essentially the same starting-offset representation. It is an optional attribute of each method's [`Code`](https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.3), and every `(start_pc, line_number)` entry marks where a source line begins. One difference is that the spec does not require the pairs to be sorted. When HotSpot needs to find the line number, [`line_number_from_bci`](https://code.googlesource.com/edge/openjdk/+/4c9e8b056de9eaa7412d42edfe4bf0b29e02250e/hotspot/src/share/vm/oops/method.cpp#628) conducts a linear search to find the predecessor.
 ### Lua
 Lua stores line information in a parallel array, similar to the book's implementation. However, instead of storing the exact line number for every instruction, it stores the one-byte delta from the previous line number and occasional absolute checkpoints ([source](https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/lobject.h#L568-L577)) to keep lookup scans bounded ([writer](https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/lcode.c#L324-L346), [reader](https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/ldebug.c#L80-L97)).
 
@@ -172,8 +165,10 @@ For example, given an absolute checkpoint of `(pc 2, line 300)`:
 
 ```text
 instruction:  0   1    2    3    4
-source line: 10  10  300  310  314
-lineinfo:     0   0  ABS   +10   +4
+source line: 10  10  300  310   314 (instead of storing lines)
+lineinfo:     0   0  ABS   +10   +4 (store line delta)
+                      ^
+                      |-- checkpoint when delta exceeds one byte
 ```
 
 To find the line for instruction 4, Lua starts at line 300 and adds the following deltas: `300 + 10 + 4 = 314`.
