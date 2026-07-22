@@ -67,7 +67,7 @@ To find the line for an arbitrary offset, we can walk through the runs while acc
 
 A random lookup therefore takes `O(r)` time in the worst case. If we perform a new linear scan for every byte while disassembling a chunk, the total cost is `O(nr)`. Since `r` can equal `n`, the worst case is `O(n²)`.
 
-### Linear search with cursor
+### One-pass traversal
 
 However, run-length encoding is not inherently quadratic. If a disassembler visits offsets in increasing order, it can keep a cursor pointing to the current run. Each byte and each run is then visited only once, giving `O(n + r)`, which simplifies to `O(n)` because `r <= n`.
 
@@ -133,7 +133,7 @@ This code depends on the invariants:
 
 - `get_line` is called only for a valid bytecode offset.
 - `line_starts` remain sorted because bytecode is appended in order.
-### Linear search with cursor again
+### One-pass traversal with starting offsets
 
 Binary search is useful for an arbitrary lookup. During sequential disassembly, a cursor can instead point to the current starting pair. Whenever the next pair's starting offset is less than or equal to the current bytecode offset, we advance the cursor. Because the cursor only moves forward, it visits each pair at most once, giving `O(n)` traversal overall.
 
