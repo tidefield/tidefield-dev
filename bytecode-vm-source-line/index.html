@@ -1,0 +1,155 @@
+<!DOCTYPE html><html lang="en" data-astro-cid-37fxchfa> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><meta name="viewport" content="width=device-width"><meta name="generator" content="Astro v5.16.12"><!-- SEO --><title>Compact Bytecode-to-Source Mapping</title><meta name="description" content="Compressing source-line metadata while preserving efficient bytecode lookups"><link rel="canonical" href="https://tidefield.dev/bytecode-vm-source-line/"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://tidefield.dev/bytecode-vm-source-line/"><meta property="og:title" content="Compact Bytecode-to-Source Mapping"><meta property="og:description" content="Compressing source-line metadata while preserving efficient bytecode lookups"><meta property="og:image" content="https://tidefield.dev/images/bytecode-vm-source-lines.png"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://tidefield.dev/bytecode-vm-source-line/"><meta property="twitter:title" content="Compact Bytecode-to-Source Mapping"><meta property="twitter:description" content="Compressing source-line metadata while preserving efficient bytecode lookups"><meta property="twitter:image" content="https://tidefield.dev/images/bytecode-vm-source-lines.png"><!-- RSS --><link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml"><style>article h2{margin-top:1.25rem;margin-bottom:1rem}article h3{margin-top:1rem;margin-bottom:.75rem}article h2 a[data-heading-link],article h3 a[data-heading-link]{color:var(--heading-ink);text-decoration:none}article h2 a[data-heading-link]:hover,article h3 a[data-heading-link]:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.2em}article p{margin-bottom:1rem}article ul,article ol{margin-bottom:1rem;margin-left:2rem}article li{margin-bottom:.5rem}article pre{background:#f4f4f4;padding:1rem;overflow-x:auto;border-radius:4px;margin-bottom:1rem}article code{background:#f4f4f4;padding:.2rem .4rem;border-radius:3px;font-size:.9em}article pre code{background:none;padding:0}article table{width:100%;margin-bottom:1.5rem;border-collapse:collapse}article th,article td{padding:.6rem .75rem;border:1px solid var(--rule);text-align:left;vertical-align:top}article th{background:var(--page-bg);color:var(--heading-ink);font-weight:600}article blockquote{border-left:2px solid #9a8b62;color:#555;margin:1.5rem 0 2rem;padding:.25rem 0 .25rem 1.25rem;font-style:italic}article blockquote p:last-child{margin-bottom:0}article blockquote:has(+blockquote){margin-bottom:.5rem}article blockquote+blockquote{margin-top:0}article a[data-footnote-ref]{display:inline-block;min-width:1.2em;margin-left:.1em;font-size:.75em;font-weight:600;line-height:1;text-align:center;text-decoration:none;vertical-align:super}article .footnotes{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--rule);color:var(--muted-ink);font-size:.875rem;line-height:1.65}article .footnotes .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}article .footnotes ol{margin:0;padding-left:1.5rem;list-style-position:outside}article .footnotes li,article .footnotes p{margin-bottom:0}article a[data-footnote-backref]{margin-left:.2em;text-decoration:none}
+</style>
+<link rel="stylesheet" href="/_astro/bytecode-vm-source-line.B1ojnVN-.css"></head> <body data-astro-cid-37fxchfa> <header data-astro-cid-37fxchfa> <nav data-astro-cid-dmqpwcec> <div data-astro-cid-dmqpwcec> <a href="/" class data-astro-cid-dmqpwcec>About</a> <a href="/posts" class data-astro-cid-dmqpwcec>Posts</a> </div> <div data-astro-cid-dmqpwcec> <a href="/subscribe" class data-astro-cid-dmqpwcec>Subscribe</a> <a href="/rss.xml" class="rss-link" title="RSS Feed" target="_blank" data-astro-cid-dmqpwcec> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-astro-cid-dmqpwcec> <path d="M4 11a9 9 0 0 1 9 9" data-astro-cid-dmqpwcec></path> <path d="M4 4a16 16 0 0 1 16 16" data-astro-cid-dmqpwcec></path> <circle cx="5" cy="19" r="1" data-astro-cid-dmqpwcec></circle> </svg> </a> </div> </nav>  </header> <main data-astro-cid-37fxchfa>  <article> <header style="margin-bottom: 2rem;"> <h1 style="margin-bottom: 0.5rem;">Compact Bytecode-to-Source Mapping</h1> <time style="color: #666; font-size: 0.9rem;">2026-07-21</time> </header> <div style="line-height: 1.8;"> <blockquote>
+<p>I encountered this problem while working through the challenges in chapter 14 of Robert Nystrom’s <a href="https://craftinginterpreters.com/chunks-of-bytecode.html#challenges">Crafting Interpreters</a>.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note:</strong> Production VMs are more sophisticated, though I’ll share how this is similar to other VMs like JVM and Lua at <a href="#how-other-vms-approach-this">the end of this post</a>.</p>
+</blockquote>
+<h2 id="background">Background</h2>
+<p>The first half of the book implements a toy language, jlox, from the top down, starting with lexing and parsing to build an AST and then interpreting it. The second half re-implements the same language but from the bottom up, beginning with the bytecode structure.</p>
+<figure>
+  <img src="/images/bytecode-vm-source-lines.png" alt="A bytecode chunk containing code, constants, and source-line metadata">
+  <figcaption>Source: <a href="https://craftinginterpreters.com/chunks-of-bytecode.html#what-is-bytecode"><cite>Crafting Interpreters</cite>, chapter 14</a></figcaption>
+</figure>
+<p>It stores bytecode in a <strong>chunk</strong>, which contains a sequence of bytes. Each byte is either an opcode or an operand belonging to an opcode. Instructions can therefore occupy different numbers of bytes. For example, <code>OP_RETURN</code> is a single byte, while <code>OP_CONSTANT</code> is followed by an operand containing an index into the chunk’s constant pool:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>offset       0                 1                 2</span></span>
+<span class="line"><span>byte     OP_CONSTANT     constant index      OP_RETURN</span></span>
+<span class="line"><span>             \___________________/               |</span></span>
+<span class="line"><span>                one instruction         another instruction</span></span></code></pre>
+<p>When an instruction causes a runtime error, the VM needs a way to translate the bytecode offset back to the source line that produced it. So the chunk needs to store the line numbers.</p>
+<p>A straightforward solution is to store a second array, <code>lines</code>, in parallel with the bytecode so that every byte gets a corresponding source line:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>offset:       0  1  2  3  4  5  6  7</span></span>
+<span class="line"><span>code:        00 01 00 02 01 00 03 01</span></span>
+<span class="line"><span>line:         1  1  1  1  1  2  2  2</span></span></code></pre>
+<p>This design is simple and gives us <code>O(1)</code> lookup. However, it takes up <code>O(n)</code> memory for <code>n</code> bytes of bytecode.</p>
+<p>Looking at the lines array above, we can exploit the fact that several consecutive bytes can come from the same source line.</p>
+<h2 id="run-length-encoding">Run-length encoding</h2>
+<p><a href="https://en.wikipedia.org/wiki/Run-length_encoding">Run-length encoding</a> stores each line number once along with the number of consecutive bytes belonging to it:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>line per byte:  1  1  1  1  1 | 2  2  2</span></span>
+<span class="line"><span>encoded runs:          (5, 1) |  (3, 2)</span></span>
+<span class="line"><span>                       count,line</span></span></code></pre>
+<ul>
+<li><code>n</code> is the number of bytecode bytes.</li>
+<li><code>r</code> is the number of consecutive line runs.</li>
+</ul>
+<p>Here, <code>n = 8</code> and <code>r = 2</code>. In general, <code>1 &#x3C;= r &#x3C;= n</code>. The best case is an entire chunk produced from one source line, where <code>r = 1</code>. The worst case changes source lines after every byte, where <code>r = n</code>. Run-length encoding reduces the line table from <code>O(n)</code> to <code>O(r)</code> memory.</p>
+<h3 id="linear-search">Linear search</h3>
+<p>To find the line for an arbitrary offset, we can walk through the runs while accumulating their lengths. For offset 6:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>(5, 1) -> covers offsets 0..4</span></span>
+<span class="line"><span>(3, 2) -> covers offsets 5..7  &#x3C;- offset 6 is here</span></span></code></pre>
+<p>A random lookup therefore takes <code>O(r)</code> time in the worst case. If we perform a new linear scan for every byte while disassembling a chunk, the total cost is <code>O(nr)</code>. Since <code>r</code> can equal <code>n</code>, the worst case is <code>O(n²)</code>.</p>
+<h3 id="linear-search-with-cursor">Linear search with cursor</h3>
+<p>However, run-length encoding is not inherently quadratic. If a disassembler visits offsets in increasing order, it can keep a cursor pointing to the current run. Each byte and each run is then visited only once, giving <code>O(n + r)</code>, which simplifies to <code>O(n)</code> because <code>r &#x3C;= n</code>.</p>
+<p>This approach is ideal for sequential traversal, but it does not improve arbitrary lookups, which remain <code>O(r)</code>. If an error gives us an offset somewhere in the middle of a chunk, we still need to scan runs from the beginning unless we store more information.</p>
+<h2 id="predecessor-problem">Predecessor problem</h2>
+<p>Instead of recording run length, we can record the run’s starting offset:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>offset:          0  1  2 | 3  4 | 5</span></span>
+<span class="line"><span>line:            1  1  1 | 2  2 | 3</span></span>
+<span class="line"><span>starting pairs: (0, 1)    (3, 2) (5, 3)</span></span></code></pre>
+<p>Each pair means starting at this bytecode offset, this number of subsequent bytes belong to this source line. Essentially, this is now a <a href="https://people.seas.harvard.edu/~cs224/spring17/lec/lec1.pdf">static predecessor problem</a>.<sup><a href="#user-content-fn-1" id="user-content-fnref-1" data-footnote-ref="" aria-describedby="footnote-label">1</a></sup></p>
+<h3 id="binary-search">Binary search</h3>
+<p>Because the pairs are sorted by their starting offsets, we can solve the static predecessor problem via a modified binary search.</p>
+<p>Consider:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>starting pairs:  (0, 1)  (3, 2)  (5, 3)</span></span></code></pre>
+<p>Given a target offset of 4, we find the greatest starting offset that is less than or equal to 4 which is <code>(3, 2)</code>.</p>
+<p>During binary search, <code>left</code> and <code>right</code> delimit the region that could still contain an exact match. If no exact match exists, they eventually cross:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>                         target 4</span></span>
+<span class="line"><span>                            v</span></span>
+<span class="line"><span>starting offsets:  0    3 | 5</span></span>
+<span class="line"><span>                        ^   ^</span></span>
+<span class="line"><span>                     right left</span></span></code></pre>
+<p>If there is no exact match, <code>pair[right]</code> points to the greatest starting offset below the target. Together with the exact-match case, this finds the greatest starting offset less than or equal to the target.</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="rust"><code><span class="line"><span style="color:#F97583">fn</span><span style="color:#B392F0"> get_line</span><span style="color:#E1E4E8">(chunk</span><span style="color:#F97583">:</span><span style="color:#F97583"> &#x26;</span><span style="color:#B392F0">Chunk</span><span style="color:#E1E4E8">, offset</span><span style="color:#F97583">:</span><span style="color:#B392F0"> usize</span><span style="color:#E1E4E8">) </span><span style="color:#F97583">-></span><span style="color:#B392F0"> usize</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">    let</span><span style="color:#F97583"> mut</span><span style="color:#E1E4E8"> left </span><span style="color:#F97583">=</span><span style="color:#79B8FF"> 0</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    let</span><span style="color:#F97583"> mut</span><span style="color:#E1E4E8"> right </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> chunk</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">line_starts</span><span style="color:#F97583">.</span><span style="color:#B392F0">len</span><span style="color:#E1E4E8">() </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">    while</span><span style="color:#E1E4E8"> left </span><span style="color:#F97583">&#x3C;=</span><span style="color:#E1E4E8"> right {</span></span>
+<span class="line"><span style="color:#F97583">        let</span><span style="color:#E1E4E8"> mid </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> left </span><span style="color:#F97583">+</span><span style="color:#E1E4E8"> (right </span><span style="color:#F97583">-</span><span style="color:#E1E4E8"> left) </span><span style="color:#F97583">/</span><span style="color:#79B8FF"> 2</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#F97583">        let</span><span style="color:#E1E4E8"> (mid_offset, mid_line) </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> chunk</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">line_starts[mid];</span></span>
+<span class="line"><span style="color:#F97583">        if</span><span style="color:#E1E4E8"> offset </span><span style="color:#F97583">&#x3C;</span><span style="color:#E1E4E8"> mid_offset {</span></span>
+<span class="line"><span style="color:#E1E4E8">            right </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> mid </span><span style="color:#F97583">-</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">        } </span><span style="color:#F97583">else</span><span style="color:#F97583"> if</span><span style="color:#E1E4E8"> offset </span><span style="color:#F97583">></span><span style="color:#E1E4E8"> mid_offset {</span></span>
+<span class="line"><span style="color:#E1E4E8">            left </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> mid </span><span style="color:#F97583">+</span><span style="color:#79B8FF"> 1</span><span style="color:#E1E4E8">;</span></span>
+<span class="line"><span style="color:#E1E4E8">        } </span><span style="color:#F97583">else</span><span style="color:#E1E4E8"> {</span></span>
+<span class="line"><span style="color:#F97583">            return</span><span style="color:#E1E4E8"> mid_line;</span></span>
+<span class="line"><span style="color:#E1E4E8">        }</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#F97583">    let</span><span style="color:#E1E4E8"> (_, line) </span><span style="color:#F97583">=</span><span style="color:#E1E4E8"> chunk</span><span style="color:#F97583">.</span><span style="color:#E1E4E8">line_starts[right];</span></span>
+<span class="line"><span style="color:#E1E4E8">    line</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span></code></pre>
+<p>This code depends on the invariants:</p>
+<ul>
+<li><code>get_line</code> is called only for a valid bytecode offset.</li>
+<li><code>line_starts</code> remain sorted because bytecode is appended in order.</li>
+</ul>
+<h3 id="linear-search-with-cursor-again">Linear search with cursor again</h3>
+<p>Binary search is useful for an arbitrary lookup. During sequential disassembly, a cursor can instead point to the current starting pair. Whenever the next pair’s starting offset is less than or equal to the current bytecode offset, we advance the cursor. Because the cursor only moves forward, it visits each pair at most once, giving <code>O(n)</code> traversal overall.</p>
+<p>This gives the starting-offset data structure two useful access patterns:</p>
+<ul>
+<li>Use binary search for a random offset: <code>O(log r)</code>.</li>
+<li>Use a cursor for an ordered traversal: <code>O(n)</code> overall.</li>
+</ul>
+<p>The beauty is we’re not forced to choose between binary search and the cursor approach. We can choose either one depending on the scenario.</p>
+<h2 id="runtime-analysis">Runtime analysis</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Approach</th><th align="right">Memory</th><th align="right">Random lookup</th><th align="right">Full traversal</th></tr></thead><tbody><tr><td>One line per byte</td><td align="right"><code>O(n)</code></td><td align="right"><code>O(1)</code></td><td align="right"><code>O(n)</code></td></tr><tr><td>Run lengths + fresh linear search</td><td align="right"><code>O(r)</code></td><td align="right"><code>O(r)</code></td><td align="right"><code>O(nr)</code>, worst-case <code>O(n²)</code></td></tr><tr><td>Run lengths + cursor</td><td align="right"><code>O(r)</code></td><td align="right"><code>O(r)</code></td><td align="right"><code>O(n)</code></td></tr><tr><td>Starting offsets + binary search</td><td align="right"><code>O(r)</code></td><td align="right"><code>O(log r)</code></td><td align="right"><code>O(n log r)</code></td></tr><tr><td>Starting offsets + cursor</td><td align="right"><code>O(r)</code></td><td align="right"><code>O(log r)</code> when needed</td><td align="right"><code>O(n)</code></td></tr></tbody></table>
+<h2 id="how-other-vms-approach-this">How other VMs approach this</h2>
+<h3 id="jvm">JVM</h3>
+<p>The JVM’s <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.12"><code>LineNumberTable</code></a> uses essentially the same starting-offset representation. It is an optional attribute of each method’s <a href="https://docs.oracle.com/javase/specs/jvms/se25/html/jvms-4.html#jvms-4.7.3"><code>Code</code></a>, and every <code>(start_pc, line_number)</code> entry marks where a source line begins. For example:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>(0, 10)  (4, 11)  (9, 14)</span></span></code></pre>
+<p>Bytecode offset 6 maps to line 11 because <code>(4, 11)</code> has the greatest <code>start_pc</code> less than or equal to 6. One difference is that the spec does not require the entries to be sorted. When HotSpot needs to find the line number, <a href="https://code.googlesource.com/edge/openjdk/+/4c9e8b056de9eaa7412d42edfe4bf0b29e02250e/hotspot/src/share/vm/oops/method.cpp#628"><code>line_number_from_bci</code></a> conducts a linear search to find the predecessor.</p>
+<h3 id="lua">Lua</h3>
+<p>Lua stores line information in a parallel array, similar to the book’s implementation. However, instead of storing the exact line number for every instruction, it stores the one-byte delta from the previous line number and occasional absolute checkpoints (<a href="https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/lobject.h#L568-L577">source</a>) to keep lookup scans bounded (<a href="https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/lcode.c#L324-L346">writer</a>, <a href="https://github.com/lua/lua/blob/84938a7d2b680d2d28ec99606e84fe712efd9a69/ldebug.c#L80-L97">reader</a>).</p>
+<p>For example, given an absolute checkpoint of <code>(pc 2, line 300)</code>:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>instruction:  0   1    2    3    4</span></span>
+<span class="line"><span>source line: 10  10  300  310  314</span></span>
+<span class="line"><span>lineinfo:     0   0  ABS   +10   +4</span></span></code></pre>
+<p>To find the line for instruction 4, Lua starts at line 300 and adds the following deltas: <code>300 + 10 + 4 = 314</code>.</p>
+<section data-footnotes="" class="footnotes"><h2 class="sr-only" id="footnote-label">Footnotes</h2>
+<ol>
+<li id="user-content-fn-1">
+<p>While researching this problem, I discovered that it is referred to as a static predecessor problem in the <a href="https://youtu.be/0JUN9aDxVmI?si=ZqUIW5ZrwZuBPvAU&#x26;t=629">first lecture of Harvard’s CS224: Advanced Algorithms course</a>. The lecture also introduces the dynamic predecessor problem and the word RAM model. I only skimmed those topics, but I hope to encounter a practical use for them whether in a bytecode VM or somewhere else. <a href="#user-content-fnref-1" data-footnote-backref="" aria-label="Back to reference 1" class="data-footnote-backref">↩</a></p>
+</li>
+</ol>
+</section> </div> <script type="module">document.querySelectorAll("article h2[id], article h3[id]").forEach(e=>{if(e.querySelector("a[data-heading-link]"))return;const t=document.createElement("a");t.href=`#${e.id}`,t.dataset.headingLink="",t.textContent=e.textContent??"",t.setAttribute("aria-label",`Link to ${t.textContent}`),e.textContent="",e.append(t)});</script> </article>   </main> <footer data-astro-cid-37fxchfa> <div class="rc-scout-wrapper" data-astro-cid-37fxchfa> <div class="rc-scout" data-scout-rendered="true" data-astro-cid-37fxchfa> <p class="rc-scout__text" data-astro-cid-37fxchfa> <i class="rc-scout__logo" data-astro-cid-37fxchfa></i> Want to become a better
+                        programmer? <a class="rc-scout__link" href="https://www.recurse.com/scout/click?t=cd98405c4c2b83c6da83f36898f9c11f" data-astro-cid-37fxchfa>Join the Recurse Center!</a> </p> </div>  </div> </footer> </body> </html>
