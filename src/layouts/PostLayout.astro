@@ -34,11 +34,11 @@ const { title, date, description, image } = frontmatter;
 
     <style is:global>
         article h2 {
-            margin-top: 2rem;
+            margin-top: 1.25rem;
             margin-bottom: 1rem;
         }
         article h3 {
-            margin-top: 1.5rem;
+            margin-top: 1rem;
             margin-bottom: 0.75rem;
         }
         article h2 a[data-heading-link],
@@ -80,6 +80,23 @@ const { title, date, description, image } = frontmatter;
             background: none;
             padding: 0;
         }
+        article table {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            border-collapse: collapse;
+        }
+        article th,
+        article td {
+            padding: 0.6rem 0.75rem;
+            border: 1px solid var(--rule);
+            text-align: left;
+            vertical-align: top;
+        }
+        article th {
+            background: var(--page-bg);
+            color: var(--heading-ink);
+            font-weight: 600;
+        }
         article blockquote {
             border-left: 2px solid #9a8b62;
             color: #555;
@@ -89,6 +106,55 @@ const { title, date, description, image } = frontmatter;
         }
         article blockquote p:last-child {
             margin-bottom: 0;
+        }
+        article blockquote:has(+ blockquote) {
+            margin-bottom: 0.5rem;
+        }
+        article blockquote + blockquote {
+            margin-top: 0;
+        }
+        article a[data-footnote-ref] {
+            display: inline-block;
+            min-width: 1.2em;
+            margin-left: 0.1em;
+            font-size: 0.75em;
+            font-weight: 600;
+            line-height: 1;
+            text-align: center;
+            text-decoration: none;
+            vertical-align: super;
+        }
+        article .footnotes {
+            margin-top: 3rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--rule);
+            color: var(--muted-ink);
+            font-size: 0.875rem;
+            line-height: 1.65;
+        }
+        article .footnotes .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        article .footnotes ol {
+            margin: 0;
+            padding-left: 1.5rem;
+            list-style-position: outside;
+        }
+        article .footnotes li,
+        article .footnotes p {
+            margin-bottom: 0;
+        }
+        article a[data-footnote-backref] {
+            margin-left: 0.2em;
+            text-decoration: none;
         }
     </style>
 </BaseLayout>
