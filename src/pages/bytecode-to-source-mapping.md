@@ -1,6 +1,6 @@
 ---
 layout: ../layouts/PostLayout.astro
-title: Compact Bytecode-to-Source Mapping
+title: Bytecode-to-Source Mapping
 date: "2026-07-21"
 description: Compressing source-line metadata while preserving efficient bytecode lookups
 image: /images/bytecode-vm-source-lines.png
