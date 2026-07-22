@@ -1,7 +1,7 @@
 {
   "files": [
-    "_astro/bytecode-vm-source-line.B1ojnVN-.css",
-    "bytecode-vm-source-line/index.html",
+    "_astro/bytecode-to-source-mapping.B1ojnVN-.css",
+    "bytecode-to-source-mapping/index.html",
     "doing-nothing-is-doing-something/index.html",
     "favicon.svg",
     "hello-world-again/index.html",
